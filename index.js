@@ -28,6 +28,7 @@ app.use(cookieParser());
 app.use("/", baseRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/forum", forumRouter);
+app.use("/api/events",eventRouter);
 
 // server listening
 app.listen(PORT, () => {
