@@ -27,6 +27,7 @@ const registeredUsersSchema = new mongoose.Schema(
       default: false,
     },
     report: { type: Number, default: 0 },
+    college: { type: String },
     refreshToken: String,
     resetPasswordToken: String,
     resetPasswordExpiresAt: Date,

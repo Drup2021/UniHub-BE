@@ -1,30 +1,23 @@
+import Questions from "../../models/Question.js"; // Adjust the path as needed
+
 const getQues = async (req, res) => {
   try {
-    const error = {
-      message: "Error in retrieving questions",
-      error: "Bad request",
-    };
-
-    QuestionDB.aggregate([
+    const questions = await Questions.aggregate([
       {
         $lookup: {
-          from: "comments",
+          from: "comments", // Ensure this matches your MongoDB collection name for comments
           let: { question_id: "$_id" },
           pipeline: [
             {
               $match: {
-                $expr: {
-                  $eq: ["$question_id", "$$question_id"],
-                },
+                $expr: { $eq: ["$question_id", "$$question_id"] },
               },
             },
             {
               $project: {
                 _id: 1,
-                // user_id: 1,
                 comment: 1,
                 created_at: 1,
-                // question_id: 1,
               },
             },
           ],
@@ -33,54 +26,33 @@ const getQues = async (req, res) => {
       },
       {
         $lookup: {
-          from: "answers",
+          from: "answers", // Ensure this matches your MongoDB collection name for answers
           let: { question_id: "$_id" },
           pipeline: [
             {
               $match: {
-                $expr: {
-                  $eq: ["$question_id", "$$question_id"],
-                },
+                $expr: { $eq: ["$question_id", "$$question_id"] },
               },
             },
             {
-              $project: {
-                _id: 1,
-                // user_id: 1,
-                // answer: 1,
-                // created_at: 1,
-                // question_id: 1,
-                // created_at: 1,
-              },
+              $project: { _id: 1 },
             },
           ],
           as: "answerDetails",
         },
       },
-      // {
-      //   $unwind: {
-      //     path: "$answerDetails",
-      //     preserveNullAndEmptyArrays: true,
-      //   },
-      // },
       {
-        $project: {
-          __v: 0,
-          // _id: "$_id",
-          // answerDetails: { $first: "$answerDetails" },
-        },
+        $project: { __v: 0 }, // Exclude __v field from the output
       },
-    ])
-      .exec()
-      .then((questionDetails) => {
-        res.status(200).send(questionDetails);
-      })
-      .catch((e) => {
-        console.log("Error: ", e);
-        res.status(400).send(error);
-      });
+    ]);
+
+    return res.status(200).json(questions);
   } catch (err) {
-    return res.status(400).json({ message: err.message });
+    console.error("Error retrieving questions:", err);
+    return res.status(400).json({
+      message: "Error in retrieving questions",
+      error: err.message,
+    });
   }
 };
 
