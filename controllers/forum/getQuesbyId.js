@@ -1,8 +1,11 @@
+import mongoose from "mongoose";
+import Questions from "../../models/Question.js"; // Adjust the path as needed
+
 const getQuesbyId = async (req, res) => {
   try {
-    QuestionDB.aggregate([
+    const questionDetails = await Questions.aggregate([
       {
-        $match: { _id: mongoose.Types.ObjectId(req.params.id) },
+        $match: { _id: new mongoose.Types.ObjectId(req.params.id) },
       },
       {
         $lookup: {
@@ -11,9 +14,7 @@ const getQuesbyId = async (req, res) => {
           pipeline: [
             {
               $match: {
-                $expr: {
-                  $eq: ["$question_id", "$$question_id"],
-                },
+                $expr: { $eq: ["$question_id", "$$question_id"] },
               },
             },
             {
@@ -21,7 +22,6 @@ const getQuesbyId = async (req, res) => {
                 _id: 1,
                 user: 1,
                 answer: 1,
-                // created_at: 1,
                 question_id: 1,
                 created_at: 1,
               },
@@ -37,9 +37,7 @@ const getQuesbyId = async (req, res) => {
           pipeline: [
             {
               $match: {
-                $expr: {
-                  $eq: ["$question_id", "$$question_id"],
-                },
+                $expr: { $eq: ["$question_id", "$$question_id"] },
               },
             },
             {
@@ -48,8 +46,6 @@ const getQuesbyId = async (req, res) => {
                 question_id: 1,
                 user: 1,
                 comment: 1,
-                // created_at: 1,
-                // question_id: 1,
                 created_at: 1,
               },
             },
@@ -57,30 +53,17 @@ const getQuesbyId = async (req, res) => {
           as: "comments",
         },
       },
-      // {
-      //   $unwind: {
-      //     path: "$answerDetails",
-      //     preserveNullAndEmptyArrays: true,
-      //   },
-      // },
       {
         $project: {
           __v: 0,
-          // _id: "$_id",
-          // answerDetails: { $first: "$answerDetails" },
         },
       },
-    ])
-      .exec()
-      .then((questionDetails) => {
-        res.status(200).send(questionDetails);
-      })
-      .catch((e) => {
-        console.log("Error: ", e);
-        res.status(400).send(error);
-      });
+    ]).exec();
+
+    res.status(200).json(questionDetails);
   } catch (err) {
-    return res.status(400).json({ message: err.message });
+    console.error("Error retrieving question by ID:", err);
+    res.status(400).json({ message: err.message });
   }
 };
 
