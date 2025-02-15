@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 import baseRouter from "./routes/root.js";
 import authRouter from "./routes/api/auth/root.js";
 import forumRouter from "./routes/api/forum/root.js";
+import eventRouter from "./routes/api/events/root.js";
 
 // env variables
 const PORT = process.env.PORT || 3000;
@@ -28,7 +29,7 @@ app.use(cookieParser());
 app.use("/", baseRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/forum", forumRouter);
-app.use("/api/events",eventRouter);
+app.use("/api/events", eventRouter);
 
 // server listening
 app.listen(PORT, () => {
